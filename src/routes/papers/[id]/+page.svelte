@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	// Mocked data
 	const paper = {
 		title: 'KAN: Kolmogorov-Arnold Networks',
@@ -37,6 +37,14 @@
 			// 添加method数据
 		]
 	};
+
+	let editSection: string = '';
+	let showModal = false;
+
+	function toggleModal(section: string) {
+		showModal = !showModal;
+		editSection = section;
+	}
 </script>
 
 <main class="container mx-auto px-4 py-8">
@@ -71,7 +79,7 @@
 							class="px-2 py-1 text-xs font-medium text-grey rounded-md hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-200"
 							type="button"
 							id="datasetEditMenu"
-							data-bs-toggle="modal"
+							on:click={() => toggleModal('code')}
 							data-bs-target="#editDatasets"
 							aria-haspopup="true"
 							aria-expanded="false"
@@ -117,7 +125,7 @@
 							class="px-2 py-1 text-xs font-medium text-grey rounded-md hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-200"
 							type="button"
 							id="datasetEditMenu"
-							data-bs-toggle="modal"
+							on:click={() => toggleModal('dataset')}
 							data-bs-target="#editDatasets"
 							aria-haspopup="true"
 							aria-expanded="false"
@@ -160,7 +168,7 @@
 							class="px-2 py-1 text-xs font-medium text-grey rounded-md hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-200"
 							type="button"
 							id="datasetEditMenu"
-							data-bs-toggle="modal"
+							on:click={() => toggleModal('result')}
 							data-bs-target="#editDatasets"
 							aria-haspopup="true"
 							aria-expanded="false"
@@ -214,7 +222,7 @@
 							class="px-2 py-1 text-xs font-medium text-grey rounded-md hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-200"
 							type="button"
 							id="datasetEditMenu"
-							data-bs-toggle="modal"
+							on:click={() => toggleModal('method')}
 							data-bs-target="#editDatasets"
 							aria-haspopup="true"
 							aria-expanded="false"
@@ -247,5 +255,151 @@
 				</ul>
 			{/if}
 		</div>
+		{#if showModal}
+			<div
+				class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
+				tabindex="-1"
+				role="dialog"
+			>
+				<div class="modal-dialog w-full max-w-lg" role="document">
+					<div class="modal-content bg-white rounded-lg shadow-lg">
+						<div class="modal-header flex justify-between items-center p-4 border-b">
+							<h5 class="modal-title text-xl font-semibold" id="editDatasetsLabel">
+								Edit {#if editSection === 'code'}
+									Code
+								{:else if editSection === 'dataset'}
+									Dataset
+								{:else if editSection === 'result'}
+									Result
+								{:else if editSection === 'method'}
+									Method
+								{/if}
+							</h5>
+							<button
+								type="button"
+								class="close btn-close"
+								on:click={() => toggleModal('')}
+								aria-label="Close"
+							>
+								<span class="text-gray-500 hover:text-gray-700" aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<form action="" method="post">
+							<div class="modal-body paper-page-edit-dataset-modal p-4">
+								<div class="modal-body paper-page-edit-dataset-modal p-4">
+									{#if editSection === 'code'}
+										<div>
+											<label for="code-name" class="block mb-2">Code Name:</label>
+											<input
+												type="text"
+												id="code-name"
+												class="w-full mb-4 px-3 py-2 border rounded"
+											/>
+
+											<label for="code-url" class="block mb-2">Code URL:</label>
+											<input
+												type="url"
+												id="code-url"
+												class="w-full mb-4 px-3 py-2 border rounded"
+											/>
+
+											<label for="code-official" class="block mb-2">Official:</label>
+											<input type="checkbox" id="code-official" class="mb-4" />
+
+											<label for="code-stars" class="block mb-2">Stars:</label>
+											<input
+												type="number"
+												id="code-stars"
+												class="w-full mb-4 px-3 py-2 border rounded"
+											/>
+
+											<label for="code-framework" class="block mb-2">Framework:</label>
+											<select id="code-framework" class="w-full mb-4 px-3 py-2 border rounded">
+												<option value="">Select Framework</option>
+												<option value="pytorch">PyTorch</option>
+												<option value="tensorflow">TensorFlow</option>
+												<option value="theano">Theano</option>
+											</select>
+										</div>
+									{:else if editSection === 'dataset'}
+										<div>
+											<label for="dataset-name" class="block mb-2">Dataset Name:</label>
+											<input
+												type="text"
+												id="dataset-name"
+												class="w-full mb-4 px-3 py-2 border rounded"
+											/>
+
+											<label for="dataset-url" class="block mb-2">Dataset URL:</label>
+											<input
+												type="url"
+												id="dataset-url"
+												class="w-full mb-4 px-3 py-2 border rounded"
+											/>
+
+											<label for="dataset-description" class="block mb-2">Description:</label>
+											<textarea
+												id="dataset-description"
+												class="w-full mb-4 px-3 py-2 border rounded"
+											></textarea>
+										</div>
+									{:else if editSection === 'result'}
+										<div>
+											<label for="result-task" class="block mb-2">Task:</label>
+											<input
+												type="text"
+												id="result-task"
+												class="w-full mb-4 px-3 py-2 border rounded"
+											/>
+
+											<label for="result-dataset" class="block mb-2">Dataset:</label>
+											<input
+												type="text"
+												id="result-dataset"
+												class="w-full mb-4 px-3 py-2 border rounded"
+											/>
+
+											<label for="result-metric" class="block mb-2">Metric:</label>
+											<input
+												type="text"
+												id="result-metric"
+												class="w-full mb-4 px-3 py-2 border rounded"
+											/>
+
+											<label for="result-score" class="block mb-2">Score:</label>
+											<input
+												type="text"
+												id="result-score"
+												class="w-full mb-4 px-3 py-2 border rounded"
+											/>
+										</div>
+									{:else if editSection === 'method'}
+										<div>
+											<label for="method-name" class="block mb-2">Method Name:</label>
+											<input
+												type="text"
+												id="method-name"
+												class="w-full mb-4 px-3 py-2 border rounded"
+											/>
+
+											<label for="method-description" class="block mb-2">Description:</label>
+											<textarea id="method-description" class="w-full mb-4 px-3 py-2 border rounded"
+											></textarea>
+										</div>
+									{/if}
+								</div>
+							</div>
+							<div class="modal-footer p-4 border-t">
+								<button
+									type="submit"
+									class="btn btn-primary px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+									name="edit-datasets">Save</button
+								>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		{/if}
 	</div>
 </main>

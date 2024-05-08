@@ -1,31 +1,34 @@
-<script>
+<!-- Modal.svelte -->
+<script lang="ts">
     export let show = false;
-    export let content;
-    export let title;
-    export let onSave;
-    export let onClose;
-
-    let editedContent = '';
-
-    // 同步初始内容到编辑器
-    $: if (show) {
-        editedContent = content;
-    }
-</script>
-
-{#if show}
-<div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center px-4">
-    <div class="bg-white p-6 rounded-lg max-w-lg w-full">
-        <header class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold">{title}</h2>
-            <button class="text-lg" on:click={onClose}>&times;</button>
-        </header>
-        <textarea class="w-full p-2 border border-gray-300 rounded shadow-sm h-40" bind:value={editedContent}></textarea>
-        <footer class="mt-4 flex justify-end">
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" on:click={() => onSave(editedContent)}>
-                Save
+    export let toggle: () => void;
+    export let title = 'Edit';
+  
+    export let formContent = '';
+  </script>
+  
+  {#if show}
+  <div class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50" tabindex="-1" role="dialog">
+    <div class="modal-dialog w-full max-w-lg" role="document">
+      <div class="modal-content bg-white rounded-lg shadow-lg">
+        <div class="modal-header flex justify-between items-center p-4 border-b">
+          <h5 class="modal-title text-xl font-semibold">{title}</h5>
+          <button type="button" class="close btn-close" on:click={toggle} aria-label="Close">
+            <span class="text-gray-500 hover:text-gray-700" aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form action="" method="post">
+          <div class="modal-body p-4">
+            {@html formContent}
+          </div>
+          <div class="modal-footer p-4 border-t">
+            <button type="submit" class="btn btn-primary px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+              Save
             </button>
-        </footer>
+          </div>
+        </form>
+      </div>
     </div>
-</div>
-{/if}
+  </div>
+  {/if}
+  
