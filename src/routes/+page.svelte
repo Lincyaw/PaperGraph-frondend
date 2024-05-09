@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { writable, type Writable } from 'svelte/store';
-	import { debounce } from 'lodash-es'; // Ensure lodash-es is installed
+	import { writable, type Writable, get } from 'svelte/store';
+	import { debounce } from 'lodash-es';
 
 	let title: string = '';
 	let codeLink: string = '';
@@ -57,12 +57,45 @@
 			blocks[blockIndex].searchQuery = query;
 			return blocks;
 		});
-		debounce(() => fetchPapers(blockIndex, query), 300)();
+		debounce(() => fetchPapers(blockIndex, query), 300);
 	}
+    async function handleSubmit() {
+        const submissionData = {
+            title,
+            codeLink,
+            paperLink,
+            abstract,
+            novelty,
+            challenge,
+            method,
+            result,
+            comparisonBlocks: get(comparisonBlocks)
+        };
+        console.log(submissionData)
+        try {
+            const response = await fetch('/api/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(submissionData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to submit data');
+            }
+
+            // Handle success
+            alert('Submission successful!');
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            alert('Failed to submit the form.');
+        }
+    }
 </script>
 
 <div class="max-w-4xl mx-auto my-8 p-6 bg-white shadow-lg rounded-lg">
-	<form on:submit|preventDefault class="space-y-4">
+	<form on:submit|preventDefault={handleSubmit} class="space-y-4">
 		<div class="flex flex-col">
 			<label for="title" class="font-bold">Title:</label>
 			<input id="title" type="text" bind:value={title} class="mt-1 p-2 border rounded-md" />
