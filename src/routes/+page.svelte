@@ -1,104 +1,125 @@
 <script lang="ts">
-	import { writable, derived } from 'svelte/store';
-	import { onMount } from 'svelte';
-	import { debounce } from 'lodash-es'; // You might need to install lodash-es for debounce functionality
+	import { writable, type Writable } from 'svelte/store';
+	import { debounce } from 'lodash-es'; // Ensure lodash-es is installed
 
-	let title = '';
-	let codeLink = '';
-	let paperLink = '';
-	let abstract = '';
-	let novelty = '';
-	let challenge = '';
-	let method = '';
-	let result = '';
+	let title: string = '';
+	let codeLink: string = '';
+	let paperLink: string = '';
+	let abstract: string = '';
+	let novelty: string = '';
+	let challenge: string = '';
+	let method: string = '';
+	let result: string = '';
 
-	let searchResults = writable([]);
-	let searchQuery = writable(''); // 存储输入框的值
-
-	let comparisonBlocks = writable([]);
-
-	// Function to fetch paper names from the backend
-	async function fetchPapers(query: string) {
-		// const response = await fetch(`/api/papers?search=${encodeURIComponent(query)}`);
-		// const data = await response.json();
-		searchResults.set(['test1', 'test2']);
+	interface ComparisonBlock {
+		paperName: string;
+		similarities: string;
+		advantages: string;
+		searchQuery: string;
+		searchResults: string[];
 	}
 
-	const debouncedFetchPapers = debounce(fetchPapers, 300);
+	let comparisonBlocks: Writable<ComparisonBlock[]> = writable([]);
 
-	function addComparisonBlock() {
+	// Asynchronous function to simulate fetching paper names from the backend
+	async function fetchPapers(blockIndex: number, query: string): Promise<void> {
+		// Update specific comparison block's search results
+		comparisonBlocks.update((blocks) => {
+			blocks[blockIndex].searchResults = ['test1', 'test2']; // Assumed search results
+			return blocks;
+		});
+	}
+
+	function addComparisonBlock(): void {
 		comparisonBlocks.update((blocks) => [
 			...blocks,
-			{ paperName: '', similarities: '', advantages: '', searchQuery: '' }
+			{ paperName: '', similarities: '', advantages: '', searchQuery: '', searchResults: [] }
 		]);
 	}
 
-	function removeComparisonBlock(index) {
+	function removeComparisonBlock(index: number): void {
 		comparisonBlocks.update((blocks) => blocks.filter((_, i) => i !== index));
 	}
-	// 处理下拉选项点击
-	function handleSelect(result) {
-		searchQuery.set(result); // 更新输入框的值
-		searchResults.set([]); // 清空搜索结果
+
+	function handleSelect(blockIndex: number, result: string): void {
+		comparisonBlocks.update((blocks) => {
+			blocks[blockIndex].paperName = result; // Update paper name
+			blocks[blockIndex].searchQuery = result; // Also update search query state
+			blocks[blockIndex].searchResults = []; // Clear search results
+			return blocks;
+		});
+	}
+
+	function handleInput(blockIndex: number, event: Event): void {
+		const target = event.target as HTMLInputElement; // Type casting
+		const query = target.value;
+		comparisonBlocks.update((blocks) => {
+			blocks[blockIndex].searchQuery = query;
+			return blocks;
+		});
+		debounce(() => fetchPapers(blockIndex, query), 300)();
 	}
 </script>
 
 <div class="max-w-4xl mx-auto my-8 p-6 bg-white shadow-lg rounded-lg">
 	<form on:submit|preventDefault class="space-y-4">
 		<div class="flex flex-col">
-			<label class="font-bold">Title:</label>
-			<input type="text" bind:value={title} class="mt-1 p-2 border rounded-md" />
+			<label for="title" class="font-bold">Title:</label>
+			<input id="title" type="text" bind:value={title} class="mt-1 p-2 border rounded-md" />
 		</div>
 		<div class="flex flex-col">
-			<label class="font-bold">Code Link:</label>
-			<input type="text" bind:value={codeLink} class="mt-1 p-2 border rounded-md" />
+			<label for="codeLink" class="font-bold">Code Link:</label>
+			<input id="codeLink" type="text" bind:value={codeLink} class="mt-1 p-2 border rounded-md" />
 		</div>
 		<div class="flex flex-col">
-			<label class="font-bold">Paper Link:</label>
-			<input type="text" bind:value={paperLink} class="mt-1 p-2 border rounded-md" />
+			<label for="paperLink" class="font-bold">Paper Link:</label>
+			<input id="paperLink" type="text" bind:value={paperLink} class="mt-1 p-2 border rounded-md" />
 		</div>
 		<div class="flex flex-col">
-			<label class="font-bold">Abstract:</label>
-			<textarea bind:value={abstract} class="mt-1 p-2 border rounded-md h-24"></textarea>
+			<label for="abstract" class="font-bold">Abstract:</label>
+			<textarea id="abstract" bind:value={abstract} class="mt-1 p-2 border rounded-md h-24"
+			></textarea>
 		</div>
 		<div class="flex flex-col">
-			<label class="font-bold">Challenge:</label>
-			<textarea type="text" bind:value={challenge} class="mt-1 p-2 border rounded-md" />
+			<label for="challenge" class="font-bold">Challenge:</label>
+			<textarea id="challenge" bind:value={challenge} class="mt-1 p-2 border rounded-md"></textarea>
 		</div>
 		<div class="flex flex-col">
-			<label class="font-bold">Novelty:</label>
-			<textarea type="text" bind:value={novelty} class="mt-1 p-2 border rounded-md" />
+			<label for="novelty" class="font-bold">Novelty:</label>
+			<textarea id="novelty" bind:value={novelty} class="mt-1 p-2 border rounded-md"></textarea>
 		</div>
-
 		<div class="flex flex-col">
-			<label class="font-bold">Method:</label>
-			<textarea type="text" bind:value={method} class="mt-1 p-2 border rounded-md" />
+			<label for="method" class="font-bold">Method:</label>
+			<textarea id="method" bind:value={method} class="mt-1 p-2 border rounded-md"></textarea>
 		</div>
-
-        <div class="flex flex-col">
-			<label class="font-bold">Result:</label>
-			<textarea type="text" bind:value={result} class="mt-1 p-2 border rounded-md" />
+		<div class="flex flex-col">
+			<label for="result" class="font-bold">Result:</label>
+			<textarea id="result" bind:value={result} class="mt-1 p-2 border rounded-md"></textarea>
 		</div>
-
 		<button
 			type="button"
 			on:click={addComparisonBlock}
 			class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
 			>Add Comparison Block</button
 		>
-
 		{#each $comparisonBlocks as block, index (index)}
 			<div class="p-4 border rounded-md shadow-lg">
 				<div class="relative w-full">
-                    <label class="font-bold">Title:</label>
-					<input type="text" bind:value={$searchQuery} on:input={debouncedFetchPapers} class="input-class mt-1 p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none w-full" />
-					{#if $searchResults.length > 0}
+					<label for={`title-${index}`} class="font-bold">Title:</label>
+					<input
+						id={`title-${index}`}
+						type="text"
+						value={block.searchQuery}
+						on:input={(event) => handleInput(index, event)}
+						class="input-class mt-1 p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none w-full"
+					/>
+					{#if block.searchResults.length > 0}
 						<ul
 							class="results-class absolute bg-white border mt-1 z-10 w-full rounded-md shadow-lg max-h-60 overflow-auto"
 						>
-							{#each $searchResults as result}
+							{#each block.searchResults as result}
 								<li
-									on:click={() => handleSelect(result)}
+									on:click={() => handleSelect(index, result)}
 									class="result-item-class p-2 hover:bg-gray-100 cursor-pointer"
 								>
 									{result}
@@ -107,22 +128,21 @@
 						</ul>
 					{/if}
 				</div>
-
 				<div class="flex flex-col mt-4">
-					<label class="font-bold">Similarities:</label>
+					<label for={`similarities-${index}`} class="font-bold">Similarities:</label>
 					<textarea
-						type="text"
+						id={`similarities-${index}`}
 						bind:value={block.similarities}
 						class="mt-1 p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-					/>
+					></textarea>
 				</div>
 				<div class="flex flex-col mt-4">
-					<label class="font-bold">Advantages:</label>
+					<label for={`advantages-${index}`} class="font-bold">Advantages:</label>
 					<textarea
-						type="text"
+						id={`advantages-${index}`}
 						bind:value={block.advantages}
 						class="mt-1 p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-					/>
+					></textarea>
 				</div>
 				<button
 					type="button"
