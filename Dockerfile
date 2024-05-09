@@ -1,5 +1,5 @@
 # 使用官方的 Node.js 基础镜像
-FROM node:14 as build-stage
+FROM node:20 as build-stage
 
 # 设置工作目录
 WORKDIR /app
