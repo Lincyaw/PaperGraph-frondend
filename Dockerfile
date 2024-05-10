@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # 使用轻量级的 Node.js 镜像作为运行时环境
-FROM node:14-slim as production-stage
+FROM node:20-slim as production-stage
 
 # 设置工作目录
 WORKDIR /app
@@ -32,4 +32,4 @@ COPY --from=build-stage /app/build ./build
 EXPOSE 3000
 
 # 启动应用
-CMD [ "node", "build" ]
+CMD [ "node", "build/index.js" ]
