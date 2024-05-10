@@ -23,11 +23,20 @@
 
 	// Asynchronous function to simulate fetching paper names from the backend
 	async function fetchPapers(blockIndex: number, query: string): Promise<void> {
-		// Update specific comparison block's search results
-		comparisonBlocks.update((blocks) => {
-			blocks[blockIndex].searchResults = ['test1', 'test2']; // Assumed search results
-			return blocks;
-		});
+		try {
+			const apiUrl = `http://localhost:8080/api/v1/paper?query=${encodeURIComponent(query)}`;
+			const response = await fetch(apiUrl);
+			if (!response.ok) {
+				throw new Error(`Network response was not ok: ${response.statusText}`);
+			}
+			const data = await response.json();
+			comparisonBlocks.update((blocks) => {
+				blocks[blockIndex].searchResults = data.detail;
+				return blocks;
+			});
+		} catch (error) {
+			console.error('There was a problem fetching the papers:', error);
+		}
 	}
 
 	function addComparisonBlock(): void {
@@ -57,41 +66,43 @@
 			blocks[blockIndex].searchQuery = query;
 			return blocks;
 		});
-		debounce(() => fetchPapers(blockIndex, query), 300);
+		debounce(() => fetchPapers(blockIndex, query), 300)();
+
 	}
-    async function handleSubmit() {
-        const submissionData = {
-            title,
-            codeLink,
-            paperLink,
-            abstract,
-            novelty,
-            challenge,
-            method,
-            result,
-            comparisonBlocks: get(comparisonBlocks)
-        };
-        console.log(submissionData)
-        try {
-            const response = await fetch('/api/submit', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(submissionData)
-            });
 
-            if (!response.ok) {
-                throw new Error('Failed to submit data');
-            }
+	async function handleSubmit() {
+		const submissionData = {
+			title,
+			codeLink,
+			paperLink,
+			abstract,
+			novelty,
+			challenge,
+			method,
+			result,
+			comparisonBlocks: get(comparisonBlocks)
+		};
+		console.log(submissionData);
+		try {
+			const response = await fetch('/api/submit', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(submissionData)
+			});
 
-            // Handle success
-            alert('Submission successful!');
-        } catch (error) {
-            console.error('Error submitting form:', error);
-            alert('Failed to submit the form.');
-        }
-    }
+			if (!response.ok) {
+				throw new Error('Failed to submit data');
+			}
+
+			// Handle success
+			alert('Submission successful!');
+		} catch (error) {
+			console.error('Error submitting form:', error);
+			alert('Failed to submit the form.');
+		}
+	}
 </script>
 
 <div class="max-w-4xl mx-auto my-8 p-6 bg-white shadow-lg rounded-lg">
