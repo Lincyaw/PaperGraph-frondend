@@ -26,7 +26,7 @@ WORKDIR /app
 COPY --from=build-stage /app/node_modules ./node_modules
 
 # 从构建阶段复制构建输出
-COPY --from=build-stage /app/build ./build
+COPY --from=build-stage /app /app
 
 # 暴露端口
 EXPOSE 3000
